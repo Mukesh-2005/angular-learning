@@ -1,17 +1,60 @@
-<div class="card">
-  <h1>{{ name }}</h1>
-  <p class="role">{{ role }}</p>
+<header class="header">
+  <h1>My Task Manager</h1>
+  <div class="profile">Admin</div>
+</header>
 
-  <h2>Skills</h2>
-  <ul>
-    @for (skill of skills; track skill) {
-      <li>{{ skill }}</li>
-    }
-  </ul>
+<main class="main">
+  <div class="stats">
+    <div class="stat"><span>{{ tasks().length }}</span> Total</div>
+    <div class="stat"><span>{{ tasks().length - doneCount() }}</span> Pending</div>
+    <div class="stat"><span>{{ doneCount() }}</span> Completed</div>
+  </div>
 
-  <button (click)="showMessage()">Show message</button>
+  <div class="task-form">
+    <input
+      #taskInput
+      type="text"
+      placeholder="What needs doing?"
+      (keydown.enter)="addTask(taskInput.value); taskInput.value = ''"
+    />
+    <button (click)="addTask(taskInput.value); taskInput.value = ''">Add task</button>
+  </div>
 
-  @if (message()) {
-    <p class="message">{{ message() }}</p>
+  <div class="toolbar">
+    <input type="text" placeholder="Search tasks..." (input)="setSearch($event)" />
+    <div class="filters">
+      @for (f of filters; track f.value) {
+        <button
+          class="filter-btn"
+          [class.active]="filter() === f.value"
+          (click)="filter.set(f.value)"
+        >
+          {{ f.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (tasks().length === 0) {
+    <p class="empty">No tasks yet. Add one above.</p>
+  } @else if (visibleTasks().length === 0) {
+    <p class="empty">No tasks match your search or filter.</p>
   }
-</div>
+
+  @for (t of visibleTasks(); track t.id) {
+    <div class="task-card" [class.done]="t.done">
+      <h3>{{ t.text }}</h3>
+      <span class="badge" [class.completed]="t.done" [class.pending]="!t.done">
+        {{ t.done ? 'Completed' : 'Pending' }}
+      </span>
+      <div class="actions">
+        <button (click)="toggleTask(t.id)">{{ t.done ? 'Undo' : 'Mark as Done' }}</button>
+        <button class="btn-delete" (click)="deleteTask(t.id)">Delete</button>
+      </div>
+    </div>
+  }
+</main>
+
+<footer class="footer">
+  <p>&copy; 2026 My Task Manager</p>
+</footer>
